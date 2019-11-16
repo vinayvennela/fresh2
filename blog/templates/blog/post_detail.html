@@ -1,0 +1,42 @@
+{% extends 'blog/base.html' %}
+{% block mainblock %}
+
+<h1 class="posttitle loader">{{post.title}}</h1>
+{% if post.published_date %}
+  <div class="date postdate">
+    {{ post.published_date }}
+  </div>
+{% else %}
+    <a  class="btn btn-default" href="{% url 'blog:post_publish' pk=post.pk %}">Publish</a>
+{% endif %}
+ <!-- |safe tag is used to indicate values without tags, When using medium editor for Bold we may encounter something like bold  Text Bold -->
+<p class="postcontent">{{post.text|safe|linebreaksbr}}</p>
+
+{% if user.is_authenticated %}
+<a class="btn btn-primary" href="{% url 'blog:post_edit' pk=post.pk %}">Edit <span class="glyphicon glyphicon-pencil"></span></a>
+<a class="btn btn-primary" href="{% url 'blog:post_delete' pk=post.pk %}">Remove <span class="glyphicon glyphicon-remove"></span></a>
+{% endif %}
+
+<hr>
+<a class="btn btn-primary btn-comment" href="{% url 'blog:add_comment_to_post' pk=post.pk %}">Add comment</a>
+
+<div class="container">
+{% for comment in post.comments.all %}
+<br>
+    {% if user.is_authenticated or comment.approved_comment %}
+      {{comment.create_date}}
+      {% if not comment.approved_comment %}
+          <a class="btn btn-primary" href="{% url 'blog:comment_approve' pk=comment.pk %}"><span class="glyphicon glyphicon-ok" ></span>Approve</a>
+          <a class="btn btn-default" href="{% url 'blog:comment_remove' pk=comment.pk %}"><span class="glyphicon glyphicon-remove" ></span>Remove</a>
+      {% endif %}
+
+        <p>{{comment.text|safe|linebreaks}}</p>
+        <p>Posted by : {{comment.author}}</p>
+    {% endif %}
+    {% empty %}
+    <p>No Comments !</p>
+{% endfor %}
+
+</div>
+
+{% endblock %}
